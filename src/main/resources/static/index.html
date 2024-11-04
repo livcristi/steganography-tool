@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography Tool</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #eaeaea;
+            color: #444;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #f39c12;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .form-container {
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin: 0 auto 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            background-color: #f39c12;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #e67e22;
+        }
+
+        .result {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Steganography Tool</h1>
+
+<div class="form-container">
+    <form id="encryptForm">
+        <label for="image">Select Image for Encoding:</label>
+        <input type="file" id="image" name="image" accept="image/*" required>
+
+        <label for="secret">Secret Message:</label>
+        <textarea id="secret" name="secret" rows="4" required></textarea>
+
+        <label for="key">Encryption Key:</label>
+        <input type="text" id="key" name="key" required>
+
+        <input type="submit" value="Encode Image">
+    </form>
+</div>
+
+<div class="form-container">
+    <form id="decryptForm">
+        <label for="encodedImage">Select Encoded Image for Decoding:</label>
+        <input type="file" id="encodedImage" name="image" accept="image/*" required>
+
+        <label for="keyDecrypt">Decryption Key:</label>
+        <input type="text" id="keyDecrypt" name="key" required>
+
+        <input type="submit" value="Decode Image">
+    </form>
+</div>
+
+<div id="result" class="result"></div>
+
+<script>
+    document.getElementById("encryptForm").onsubmit = function (event) {
+        event.preventDefault();
+        handleEncryptFormSubmit(this);
+    };
+
+    document.getElementById("decryptForm").onsubmit = function (event) {
+        event.preventDefault();
+        handleDecryptFormSubmit(this);
+    };
+
+    function handleEncryptFormSubmit(form) {
+        const formData = new FormData(form);
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", '/images/encryption', true);
+        xhr.responseType = 'blob'; // We expect a binary response for the image
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Create a download link
+                const url = window.URL.createObjectURL(xhr.response);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "encrypted_image.png"; // Default download filename
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url); // Free up memory
+            } else {
+                document.getElementById("result").textContent = "Error: " + xhr.statusText;
+            }
+        };
+
+        xhr.onerror = function () {
+            document.getElementById("result").textContent = "Request failed.";
+        };
+
+        xhr.send(formData);
+    }
+
+    function handleDecryptFormSubmit(form) {
+        const formData = new FormData(form);
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", '/images/decryption', true);
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                document.getElementById("result").textContent = "Decoded message: " + xhr.responseText;
+            } else {
+                document.getElementById("result").textContent = "Error: " + xhr.statusText;
+            }
+        };
+
+        xhr.onerror = function () {
+            document.getElementById("result").textContent = "Request failed.";
+        };
+
+        xhr.send(formData);
+    }
+</script>
+
+</body>
+</html>

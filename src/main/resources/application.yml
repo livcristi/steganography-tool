@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: image-hider
+  servlet:
+    multipart:
+      max-file-size: 10MB    # Maximum size per file
+      max-request-size: 10MB # Maximum total request size (for multipart requests)
+
+server:
+  port: 7770
+
+encryption:
+  seed: seed # The seed used by the application. You should change it to a custom value
